@@ -1,5 +1,3 @@
-// server.js
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -24,7 +22,7 @@ app.use(express.json()); // to parse JSON bodies
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
-app.use('/api/user', userRoutes);
+app.use('/api/user', userRoutes); // روت‌های مربوط به user باید با `/api/user` بارگذاری شوند
 app.use('/api/purchase', purchaseRoutes);
 
 // Connect to MongoDB

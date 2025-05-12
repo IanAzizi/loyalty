@@ -2,36 +2,71 @@
 const Purchase = require('../models/Purchase');
 
 exports.createPurchase = async (req, res) => {
-  const { amount } = req.body;
+  const { amount, storeName } = req.body;
   const image = req.file?.filename;
 
-  // اطمینان از اینکه مقدار amount و image وجود دارند
-  if (!amount || !image) {
-    return res.status(400).json({ message: 'لطفا عکس فاکتور خود را بارگزاری فرمایید' });
+  if (!amount || !storeName || !image) {
+    return res.status(400).json({ message: 'لطفا تمام فیلدها از جمله نام فروشگاه و عکس فاکتور را وارد کنید' });
   }
 
-  // محاسبه‌ی points (این می‌تواند به دلخواه تغییر کند)
-  const points = Math.floor(amount / 1000); // مثلاً به ازای هر 1000 تومان یک امتیاز
+  const points = Math.floor(amount / 1000);
 
   try {
-    // ایجاد یک سند جدید Purchase
     const newPurchase = new Purchase({
-      user: req.user._id, // از داده‌های user که در protect ذخیره شده استفاده می‌کنیم
+      user: req.user._id,
       amount,
+      storeName,
       image,
-      points, // ذخیره points
+      points,
     });
 
-    // ذخیره خرید در دیتابیس
     await newPurchase.save();
 
-    // بازگشت نتیجه
     res.status(201).json({
-      message: 'خرید شما با موفقیت ثبت شد',
+      message: 'خرید با موفقیت ثبت شد',
       purchase: newPurchase,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'ارور سرور', error: err });
+    res.status(500).json({ message: 'خطای سرور', error: err.message });
   }
 };
+// controllers/purchaseController.js
+
+const getAllPurchases = async (req, res) => {
+  try {
+    const purchases = await Purchase.find()
+      .populate('user', 'name phone') // اینجا نام و شماره تماس رو از user می‌گیریم
+      .lean();
+
+    const fullPurchases = purchases.map(p => ({
+      ...p,
+      imageUrl: `${req.protocol}://${req.get('host')}/uploads/${p.image}`,
+    }));
+
+    res.json(fullPurchases);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+exports.getAllPurchases = async (req, res) => {
+    try {
+      const purchases = await Purchase.find()
+        .populate('user', 'name phone')
+        .lean();
+  
+      const fullPurchases = purchases.map(p => ({
+        ...p,
+        imageUrl: `${req.protocol}://${req.get('host')}/uploads/${p.image}`,
+      }));
+  
+      res.json(fullPurchases);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server Error' });
+    }
+  };
+  
+  

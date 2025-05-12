@@ -1,21 +1,36 @@
 import React, { useState } from 'react';
-import API from "../../api"; // به جای "../api"
+import API from '../../api';
 
 const PurchaseForm = () => {
-  const [shopName, setShopName] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [amount, setAmount] = useState('');
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!amount || !image) {
+      alert('لطفاً همه فیلدها را پر کنید');
+      return;
+    }
+
     const formData = new FormData();
-    formData.append('amount', shopName); // اگر shopName به amount مربوط است
+    formData.append('storeName', storeName);
+    formData.append('amount', amount);
     formData.append('image', image);
 
     try {
-      await API.post('/purchase/create', formData);
+      setLoading(true);
+      const response = await API.post('/purchase/create', formData);
       alert('خرید با موفقیت ارسال شد');
-    } catch (err) {
-      alert('ارسال خرید با مشکل مواجه شد');
+      setAmount('');
+      setImage(null);
+    } catch (error) {
+      console.error('❌ خطا در ارسال خرید:', error?.response?.data || error.message);
+      alert('ارسال خرید با خطا مواجه شد. لطفاً دوباره تلاش کنید.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -24,22 +39,35 @@ const PurchaseForm = () => {
       <form onSubmit={handleSubmit} className="purchase-form">
         <h2>ارسال خرید</h2>
         <input
-          type="text"
-          placeholder="نام فروشگاه"
-          value={shopName}
-          onChange={(e) => setShopName(e.target.value)}
+  type="text"
+  placeholder="نام فروشگاه"
+  value={storeName}
+  onChange={(e) => setStoreName(e.target.value)}
+  className="input-field"
+  required
+/>
+
+        <input
+          type="number"
+          placeholder="مبلغ خرید (تومان)"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
           className="input-field"
+          required
         />
         <input
           type="file"
+          accept="image/*"
           onChange={(e) => setImage(e.target.files[0])}
           className="input-field"
+          required
         />
-        <button type="submit" className="submit-btn">ارسال</button>
+        <button type="submit" className="submit-btn" disabled={loading}>
+          {loading ? 'در حال ارسال...' : 'ارسال'}
+        </button>
       </form>
 
       <style>{`
-        /* استایل برای فرم خرید */
         .purchase-form {
           width: 100%;
           max-width: 400px;
@@ -83,8 +111,9 @@ const PurchaseForm = () => {
           background-color: #45a049;
         }
 
-        .submit-btn:active {
-          background-color: #3e8e41;
+        .submit-btn:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
         }
       `}</style>
     </>
