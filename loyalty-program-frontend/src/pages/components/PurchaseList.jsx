@@ -7,14 +7,26 @@ dayjs.extend(jalali);
 
 const formatToJalali = (date) => {
   if (!date) return "";
-  return dayjs(date).format("YYYY/MM/DD");
+  return dayjs(date).format("YYYY/MM/DD HH:mm:ss");
 };
+
 
 
 const PurchaseList = () => {
   const [purchases, setPurchases] = useState([]);
   const [users, setUsers] = useState({});
-
+  const handleDelete = async (id) => {
+    if (!window.confirm('آیا مطمئن هستید که می‌خواهید این خرید را حذف کنید؟')) return;
+  
+    try {
+      await API.delete(`/purchase/delete/${id}`);
+      setPurchases(prev => prev.filter(p => p._id !== id));
+    } catch (err) {
+      console.error('خطا در حذف خرید:', err);
+      alert('مشکلی در حذف خرید به وجود آمد.');
+    }
+  };
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -80,6 +92,7 @@ const PurchaseList = () => {
       <table style={tableStyle}>
         <thead>
           <tr>
+            <th style={{ ...thTdStyle, ...headerStyle }}>ردیف</th>
             <th style={{ ...thTdStyle, ...headerStyle }}>نام کاربر</th>
             <th style={{ ...thTdStyle, ...headerStyle }}>شماره تماس</th>
             <th style={{ ...thTdStyle, ...headerStyle }}>فروشگاه</th>
@@ -90,12 +103,14 @@ const PurchaseList = () => {
           </tr>
         </thead>
         <tbody>
-          {purchases.map((purchase) => {
+        {purchases.map((purchase, index) => {
+
             const userId = typeof purchase.user === 'string' ? purchase.user : purchase.user?._id;
             const user = users[userId];
 
             return (
               <tr key={purchase._id}>
+                <td style={thTdStyle}>{index + 1}</td>
                 <td style={thTdStyle}>{user?.name || 'نام موجود نیست'}</td>
                 <td style={thTdStyle}>{user?.phone || 'شماره موجود نیست'}</td>
                 <td style={thTdStyle}>{purchase.storeName || 'فروشگاه ندارد'}</td>
@@ -104,15 +119,23 @@ const PurchaseList = () => {
                 <td style={thTdStyle}>{formatToJalali(purchase.createdAt)}</td>
 
                 <td style={thTdStyle}>
-                  {purchase.imageUrl ? (
-                    <button
-                      style={buttonStyle}
-                      onClick={() => window.open(purchase.imageUrl, '_blank')}
-                    >
-                      مشاهده عکس
-                    </button>
-                  ) : '—'}
-                </td>
+  {purchase.imageUrl ? (
+    <button
+      style={buttonStyle}
+      onClick={() => window.open(purchase.imageUrl, '_blank')}
+    >
+      مشاهده عکس
+    </button>
+  ) : '—'}
+
+  <button
+    style={{ ...buttonStyle, backgroundColor: '#dc3545', marginRight: '8px' }}
+    onClick={() => handleDelete(purchase._id)}
+  >
+    حذف
+  </button>
+</td>
+
               </tr>
             );
           })}

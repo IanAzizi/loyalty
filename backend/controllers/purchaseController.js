@@ -68,5 +68,31 @@ exports.getAllPurchases = async (req, res) => {
       res.status(500).json({ message: 'Server Error' });
     }
   };
+  // حذف همه خریدها
+exports.deleteAllPurchases = async (req, res) => {
+    try {
+      await Purchase.deleteMany({});
+      res.json({ message: 'همه خریدها با موفقیت حذف شدند' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'خطای سرور در حذف همه خریدها', error: err.message });
+    }
+  };
+  
+  // حذف خرید بر اساس ID
+  exports.deletePurchaseById = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deletedPurchase = await Purchase.findByIdAndDelete(id);
+      if (!deletedPurchase) {
+        return res.status(404).json({ message: 'خرید موردنظر پیدا نشد' });
+      }
+      res.json({ message: 'خرید با موفقیت حذف شد' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'خطای سرور در حذف خرید', error: err.message });
+    }
+  };
+  
   
   

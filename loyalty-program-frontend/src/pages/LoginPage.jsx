@@ -55,18 +55,17 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="container">
-      <div className="login-card">
-        <h2 className="title">{isSignup ? 'ثبت‌نام' : 'ورود'}</h2>
+    <div className="background">
+      <div className="card">
+        <h2 className="card-title">{isSignup ? 'ثبت‌نام' : 'ورود'}</h2>
         <form onSubmit={handleSubmit}>
           {isSignup && (
             <div className="input-group">
               <input
                 type="text"
-                placeholder="نام"
+                placeholder="نام کامل"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                required
                 disabled={loading}
               />
             </div>
@@ -74,10 +73,9 @@ const LoginPage = () => {
           <div className="input-group">
             <input
               type="tel"
-              placeholder="شماره تلفن"
+              placeholder="شماره تلفن همراه"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              required
               disabled={loading}
             />
           </div>
@@ -85,14 +83,11 @@ const LoginPage = () => {
             {loading ? 'در حال ارسال...' : isSignup ? 'ثبت‌نام' : 'ورود'}
           </button>
         </form>
-        <p style={{ marginTop: '1rem', textAlign: 'center' }}>
-          {isSignup ? 'قبلاً ثبت‌نام کرده‌اید؟' : 'حساب ندارید؟'}{' '}
-          <button
-            onClick={() => setIsSignup(!isSignup)}
-            style={{ border: 'none', background: 'none', color: 'blue', cursor: 'pointer' }}
-          >
+        <p className="switch-mode">
+          {isSignup ? 'قبلاً ثبت‌نام کرده‌اید؟' : 'حساب کاربری ندارید؟'}{' '}
+          <span onClick={() => setIsSignup(!isSignup)} className="switch-link">
             {isSignup ? 'ورود' : 'ثبت‌نام'}
-          </button>
+          </span>
         </p>
       </div>
     </div>
